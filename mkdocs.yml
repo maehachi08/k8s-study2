@@ -1,0 +1,41 @@
+site_name: maehachi08/k8s-study
+site_url: https://maehachi08.github.io/k8s-study
+site_description: Project documentation with Markdown.
+site_author: maehachi08
+
+repo_url: https://github.com/maehachi08/k8s-study
+edit_uri: ""
+
+# theme: readthedocs
+theme:
+  name: material
+
+# https://facelessuser.github.io/pymdown-extensions/
+markdown_extensions:
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.tabbed
+  - pymdownx.magiclink
+
+nav:
+  - Home: index.md
+  - Setup:
+    - 01. Raspberry Pi 構成: setup/01_setup_RaspberryPi.md
+    - 02. OS Install: setup/02_setup_ubuntu20-04-LTS.md
+    - 03. master/nodeで共通手順: setup/03_common_settings.md
+    - 04. 認証局の設定とTLS証明書の作成: setup/04_creation_certificate.md
+    - 05. 認証のためのkubeconfigの作成: setup/05_creating_config.md
+    - 06. master node:
+      - 01. bootstrapping kubelet: setup/bootstrapping_kubelet.md
+      - 02. bootstrapping etcd: setup/master/01_bootstrapping_etcd.md
+      - 03. bootstrapping kube-apiserver: setup/master/02_bootstrapping_kube-apiserver.md
+      - 04. bootstrapping kube-controller-manager: setup/master/03_bootstrapping_kube-controller-manager.md
+      - 05. bootstrapping kube-scheduler: setup/master/04_bootstrapping_kube-scheduler.md
+      - 06. kube-apiserver から kubelet へのアクセス権を設定する: setup/master/05_configuration_rbac_to_access_from-apiserver-to-kubelet.md
+      - 07. health check: setup/master/06_health_check.md
+    - 07. worker node:
+      - 01. bootstrapping kubelet: setup/bootstrapping_kubelet.md
+  - Tips: tips/index.md
+
+plugins:
+  - search
