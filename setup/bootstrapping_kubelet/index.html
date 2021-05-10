@@ -1,0 +1,1147 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Project documentation with Markdown.">
+      
+      
+      
+        <meta name="author" content="maehachi08">
+      
+      
+        <link rel="canonical" href="https://maehachi08.github.io/k8s-study/setup/bootstrapping_kubelet/">
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.3">
+    
+    
+      
+        <title>01. bootstrapping kubelet - maehachi08/k8s-study</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.e35208c4.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ef6f36e2.min.css">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+      
+    
+    
+    
+    
+      
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    <script>function __prefix(e){return new URL("../..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#bootstrapping-kubeletmasterworker" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="maehachi08/k8s-study" class="md-header__button md-logo" aria-label="maehachi08/k8s-study" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            maehachi08/k8s-study
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              01. bootstrapping kubelet
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://github.com/maehachi08/k8s-study" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="maehachi08/k8s-study" class="md-nav__button md-logo" aria-label="maehachi08/k8s-study" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    maehachi08/k8s-study
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/maehachi08/k8s-study" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
+      
+      <label class="md-nav__link" for="__nav_2">
+        Setup
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Setup" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Setup
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01_setup_RaspberryPi/" class="md-nav__link">
+        01. Raspberry Pi 構成
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02_setup_ubuntu20-04-LTS/" class="md-nav__link">
+        02. OS Install
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03_common_settings/" class="md-nav__link">
+        03. master/nodeで共通手順
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04_creation_certificate/" class="md-nav__link">
+        04. 認証局の設定とTLS証明書の作成
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05_creating_config/" class="md-nav__link">
+        05. 認証のためのkubeconfigの作成
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_6" type="checkbox" id="__nav_2_6" >
+      
+      <label class="md-nav__link" for="__nav_2_6">
+        06. master node
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="06. master node" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_6">
+          <span class="md-nav__icon md-icon"></span>
+          06. master node
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          01. bootstrapping kubelet
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        01. bootstrapping kubelet
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    手順
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    エラー事例
+  </a>
+  
+    <nav class="md-nav" aria-label="エラー事例">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cgroup" class="md-nav__link">
+    cgroupディレクトリが未作成の場合
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cgroupsystemreserved-memory-size" class="md-nav__link">
+    cgroupで確保するsystemReserved memory sizeが小さい場合に発生
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kubeconfig-cn-node" class="md-nav__link">
+    kubeconfig の証明書の CN がnode ホスト名と異なる
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#node-specpodcidr-cidr" class="md-nav__link">
+    Node リソースの spec.podCIDR にCIDRが設定されない
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#webhook-authentication" class="md-nav__link">
+    Webhook Authenticationの設定が正しくない
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cni-plugin-etccninetd-cni-plugin" class="md-nav__link">
+    CNI Pluginを /etc/cni/net.d でCNI Pluginが見つからない
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kubelet-cannot-determine-cpu-online-state" class="md-nav__link">
+    Kubelet cannot determine CPU online state
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    参考
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../master/01_bootstrapping_etcd/" class="md-nav__link">
+        02. bootstrapping etcd
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../master/02_bootstrapping_kube-apiserver/" class="md-nav__link">
+        03. bootstrapping kube-apiserver
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../master/03_bootstrapping_kube-controller-manager/" class="md-nav__link">
+        04. bootstrapping kube-controller-manager
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../master/04_bootstrapping_kube-scheduler/" class="md-nav__link">
+        05. bootstrapping kube-scheduler
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../master/05_configuration_rbac_to_access_from-apiserver-to-kubelet/" class="md-nav__link">
+        06. kube-apiserver から kubelet へのアクセス権を設定する
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../master/06_health_check/" class="md-nav__link">
+        07. health check
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+          
+            
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" checked>
+      
+      <label class="md-nav__link" for="__nav_2_7">
+        07. worker node
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="07. worker node" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_7">
+          <span class="md-nav__icon md-icon"></span>
+          07. worker node
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          01. bootstrapping kubelet
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        01. bootstrapping kubelet
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    手順
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    エラー事例
+  </a>
+  
+    <nav class="md-nav" aria-label="エラー事例">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cgroup" class="md-nav__link">
+    cgroupディレクトリが未作成の場合
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cgroupsystemreserved-memory-size" class="md-nav__link">
+    cgroupで確保するsystemReserved memory sizeが小さい場合に発生
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kubeconfig-cn-node" class="md-nav__link">
+    kubeconfig の証明書の CN がnode ホスト名と異なる
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#node-specpodcidr-cidr" class="md-nav__link">
+    Node リソースの spec.podCIDR にCIDRが設定されない
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#webhook-authentication" class="md-nav__link">
+    Webhook Authenticationの設定が正しくない
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cni-plugin-etccninetd-cni-plugin" class="md-nav__link">
+    CNI Pluginを /etc/cni/net.d でCNI Pluginが見つからない
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kubelet-cannot-determine-cpu-online-state" class="md-nav__link">
+    Kubelet cannot determine CPU online state
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    参考
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tips/index.md" class="md-nav__link">
+        Tips
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    手順
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    エラー事例
+  </a>
+  
+    <nav class="md-nav" aria-label="エラー事例">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cgroup" class="md-nav__link">
+    cgroupディレクトリが未作成の場合
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cgroupsystemreserved-memory-size" class="md-nav__link">
+    cgroupで確保するsystemReserved memory sizeが小さい場合に発生
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kubeconfig-cn-node" class="md-nav__link">
+    kubeconfig の証明書の CN がnode ホスト名と異なる
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#node-specpodcidr-cidr" class="md-nav__link">
+    Node リソースの spec.podCIDR にCIDRが設定されない
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#webhook-authentication" class="md-nav__link">
+    Webhook Authenticationの設定が正しくない
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cni-plugin-etccninetd-cni-plugin" class="md-nav__link">
+    CNI Pluginを /etc/cni/net.d でCNI Pluginが見つからない
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kubelet-cannot-determine-cpu-online-state" class="md-nav__link">
+    Kubelet cannot determine CPU online state
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    参考
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                
+                <h1 id="bootstrapping-kubeletmasterworker">bootstrapping kubelet(master/worker 共通)</h1>
+<h2 id="_1">手順</h2>
+<ol>
+<li>
+<p><code>kubelet</code> バイナリをダウンロード
+   <div class="highlight"><pre><span></span><code>sudo wget -P /usr/bin/ https://dl.k8s.io/v1.20.1/bin/linux/arm64/kubelet
+sudo chmod +x /usr/bin/kubelet
+</code></pre></div></p>
+</li>
+<li>
+<p>config, 証明書などを配置
+   <div class="highlight"><pre><span></span><code># host=&quot;k8s-node2&quot;
+# host=&quot;k8s-node1&quot;
+host=&quot;k8s-master&quot;
+
+sudo install -o root -g root -m 755 -d /etc/kubelet.d
+sudo install -o root -g root -m 755 -d /var/lib/kubernetes
+sudo install -o root -g root -m 755 -d /var/lib/kubelet
+sudo cp ca.pem /var/lib/kubernetes/
+sudo cp ${host}.pem ${host}-key.pem ${host}.kubeconfig /var/lib/kubelet/
+sudo cp ${host}.kubeconfig /var/lib/kubelet/kubeconfig
+</code></pre></div></p>
+</li>
+<li>
+<p><code>/var/lib/kubelet/kubelet-config.yaml</code> を作成する</p>
+<ul>
+<li><code>clusterDNS</code> は kube-dns(core-dns)のClusterIPを指定する</li>
+<li><code>podCIDR</code> はnodeで起動するPodに割り当てるIPアドレスのCIDRを指定する
+  <div class="highlight"><pre><span></span><code># host=&quot;k8s-node2&quot;
+# host=&quot;k8s-node1&quot;
+host=&quot;k8s-master&quot;
+
+cat &lt;&lt;EOF | sudo tee /var/lib/kubelet/kubelet-config.yaml
+---
+kind: KubeletConfiguration
+apiVersion: kubelet.config.k8s.io/v1beta1
+
+# https://kubernetes.io/ja/docs/tasks/configure-pod-container/static-pod/
+staticPodPath: /etc/kubelet.d
+
+# kubeletの認証方式
+#   - anonymous: false が(コンテナ実行ホストのHardeningとして)推奨される
+#   - webhook.enabled: true の場合はkube-api-server側でも諸処の設定が必要
+authentication:
+  anonymous:
+    enabled: true
+  webhook:
+    enabled: false
+    cacheTTL: &quot;2m&quot;
+  x509:
+    clientCAFile: &quot;/var/lib/kubernetes/ca.pem&quot;
+
+# kubeletの認可設定
+#   - authorization.mode のdefault動作は AlwaysAllow
+#   - authorization.mode: Webhook の場合は kube-api-serverで authorization.k8s.io/v1beta1 の有効設定が必要
+authorization:
+  mode: AlwaysAllow
+
+clusterDomain: &quot;cluster.local&quot;
+clusterDNS:
+  - &quot;10.32.0.10&quot;
+podCIDR: &quot;10.200.0.0/24&quot;
+resolvConf: &quot;/etc/resolv.conf&quot;
+runtimeRequestTimeout: &quot;15m&quot;
+tlsCertFile: &quot;/var/lib/kubelet/${host}.pem&quot;
+tlsPrivateKeyFile: &quot;/var/lib/kubelet/${host}-key.pem&quot;
+
+# Reserve Compute Resources for System Daemons
+# https://kubernetes.io/docs/tasks/administer-cluster/reserve-compute-resources/
+#
+# Podに配置可能なリソースは &quot;Node resource - system-reserved - kube-reserved - eviction-threshold&quot; らしい
+#
+# system-reserved
+#   - OS system daemons(ssh, udev, etc) 用にリソースを確保する
+#
+# kube-reserved
+#   - k8s system daemons(kubelet, container runtime, node problem detector) 用にリソースを確保する
+enforceNodeAllocatable: [&quot;pods&quot;,&quot;kube-reserved&quot;,&quot;system-reserved&quot;]
+cgroupsPerQOS: true
+cgroupDriver: systemd
+cgroupRoot: /
+systemCgroups: /system.slice
+systemReservedCgroup: /system.slice
+systemReserved:
+  cpu: 500m
+  memory: 300Mi
+runtimeCgroups: /kube.slice/crio.service
+kubeletCgroups: /kube.slice/kubelet.service
+kubeReservedCgroup: /kube.slice
+kubeReserved:
+  cpu: 100m
+  memory: 100Mi
+EOF
+</code></pre></div></li>
+</ul>
+</li>
+<li>
+<p><code>/etc/systemd/system/kubelet.service</code> を配置
+   <div class="highlight"><pre><span></span><code>cat &lt;&lt;&#39;EOF&#39; | sudo tee /etc/systemd/system/kubelet.service
+[Unit]
+Description=Kubernetes Kubelet
+Documentation=https://github.com/kubernetes/kubernetes
+After=crio.service
+Requires=crio.service
+
+[Service]
+Restart=on-failure
+RestartSec=5
+
+ExecStartPre=/usr/bin/mkdir -p \
+  /sys/fs/cgroup/systemd/kube.slice \
+  /sys/fs/cgroup/cpuset/kube.slice \
+  /sys/fs/cgroup/cpuset/system.slice \
+  /sys/fs/cgroup/pids/kube.slice \
+  /sys/fs/cgroup/pids/system.slice \
+  /sys/fs/cgroup/memory/kube.slice \
+  /sys/fs/cgroup/memory/system.slice \
+  /sys/fs/cgroup/cpu,cpuacct/kube.slice \
+  /sys/fs/cgroup/cpu,cpuacct/kube.slice
+
+ExecStart=/usr/bin/kubelet \
+  --config=/var/lib/kubelet/kubelet-config.yaml \
+  --kubeconfig=/var/lib/kubelet/kubeconfig \
+  --network-plugin=cni \
+  --container-runtime=remote \
+  --container-runtime-endpoint=/var/run/crio/crio.sock \
+  --register-node=true \
+  --v=2
+
+[Install]
+WantedBy=multi-user.target
+EOF
+</code></pre></div></p>
+</li>
+<li>
+<p><code>kubelet.service</code> を起動
+   <div class="highlight"><pre><span></span><code>sudo systemctl enable kubelet.service
+sudo systemctl start kubelet.service
+</code></pre></div></p>
+</li>
+</ol>
+<h2 id="_2">エラー事例</h2>
+<h3 id="cgroup">cgroupディレクトリが未作成の場合</h3>
+<div class="highlight"><pre><span></span><code>kubelet.go:1347] Failed to start ContainerManager Failed to enforce Kube Reserved Cgroup Limits on &quot;/kube.slice&quot;: [&quot;kube&quot;] cgroup does not exist
+</code></pre></div>
+
+<ul>
+<li>
+<p><code>kubelet</code> 起動オプションで詳細なログを出すことでPathがわかった( <code>--v 10</code> )</p>
+<div class="highlight"><pre><span></span><code>cgroup_manager_linux.go:294] The Cgroup [kube] has some missing paths: [/sys/fs/cgroup/pids/kube.slice /sys/fs/cgroup/memory/kube.slice]
+</code></pre></div>
+
+</li>
+</ul>
+<h3 id="cgroupsystemreserved-memory-size">cgroupで確保するsystemReserved memory sizeが小さい場合に発生</h3>
+<ul>
+<li>原因などは未調査、systemReserved memoryを大きくしたら発生しなくなった
+   <div class="highlight"><pre><span></span><code>kubelet.go:1347] Failed to start ContainerManager Failed to enforce System Reserved Cgroup Limits on &quot;/system.slice&quot;: failed to set supported cgroup subsystems for cgroup [system]: failed to set config for supported subsystems : failed to write &quot;104857600&quot; to &quot;/sys/fs/cgroup/memory/system.slice/memory.limit_in_bytes&quot;: write /sys/fs/cgroup/memory/system.slice/memory.limit_in_bytes: device or resource busy
+</code></pre></div></li>
+</ul>
+<h3 id="kubeconfig-cn-node">kubeconfig の証明書の <code>CN</code> がnode ホスト名と異なる</h3>
+<div class="highlight"><pre><span></span><code>360163 kubelet_node_status.go:93] Unable to register node &quot;k8s-master&quot; with API server: nodes &quot;k8s-master&quot; is forbidden: node &quot;k8s-node1&quot; is not allowed to modify node &quot;k8s-master&quot;
+</code></pre></div>
+
+<ul>
+<li>kubeconfigのclient-certificate-dataのCNを確認する
+      <div class="highlight"><pre><span></span><code>sudo cat k8s-master.kubeconfig | grep client-certificate-data | awk &#39;{print $2;}&#39; | base64 -d | openssl x509 -text | grep Subject:
+</code></pre></div><ul>
+<li><code>k8s-master</code> が正しいのに <code>CN = system:node:k8s-node1</code> となっていた
+       <div class="highlight"><pre><span></span><code>root@k8s-master:~# cat /var/lib/kubelet/kubeconfig | grep client-certificate-data | awk &#39;{print $2;}&#39; | base64 -d | openssl x509 -text | grep Subject:
+     Subject: C = JP, ST = Sample, L = Tokyo, O = system:nodes, OU = Kubernetes The HardWay, CN = system:node:k8s-master
+</code></pre></div></li>
+</ul>
+</li>
+</ul>
+<h3 id="node-specpodcidr-cidr"><code>Node</code> リソースの <code>spec.podCIDR</code> にCIDRが設定されない</h3>
+<ul>
+<li>
+<p>以下コマンドでnodeに設定したpodCIDRが表示されない</p>
+<ul>
+<li>flannnelが起動しない原因がここにあった...
+ <div class="highlight"><pre><span></span><code>kubectl get nodes -o jsonpath=&#39;{.items[*].spec.podCIDR}&#39;
+</code></pre></div></li>
+</ul>
+</li>
+<li>
+<p><code>kube-controller-manager</code> のログ</p>
+<ul>
+<li><code>Set node k8s-node1 PodCIDR to [10.200.0.0/24]</code> が出ることがポイント<ul>
+<li><code>kube-controller-manager</code> の起動オプションに <code>--allocate-node-cidrs=true</code> が必要ってお話...
+<div class="highlight"><pre><span></span><code>actual_state_of_world.go:506] Failed to update statusUpdateNeeded field in actual state of world: Failed to set statusUpdateNeeded to needed true, because nodeName=&quot;k8s-node1&quot; does not exist
+range_allocator.go:373] Set node k8s-node1 PodCIDR to [10.200.0.0/24]
+ttl_controller.go:276] &quot;Changed ttl annotation&quot; node=&quot;k8s-node1&quot; new_ttl=&quot;0s&quot;
+controller.go:708] Detected change in list of current cluster nodes. New node set: map[k8s-node1:{}]
+controller.go:716] Successfully updated 0 out of 0 load balancers to direct traffic to the updated set of nodes
+node_lifecycle_controller.go:773] Controller observed a new Node: &quot;k8s-node1&quot;
+controller_utils.go:172] Recording Registered Node k8s-node1 in Controller event message for node k8s-node1
+node_lifecycle_controller.go:1429] Initializing eviction metric for zone:
+node_lifecycle_controller.go:1044] Missing timestamp for Node k8s-node1. Assuming now as a timestamp.
+event.go:291] &quot;Event occurred&quot; object=&quot;k8s-node1&quot; kind=&quot;Node&quot; apiVersion=&quot;v1&quot; type=&quot;Normal&quot; reason=&quot;RegisteredNode&quot; message=&quot;Node k8s-node1 event: Registered Node k8s-node1 in Controller&quot;
+node_lifecycle_controller.go:1245] Controller detected that zone  is now in state Normal.
+</code></pre></div></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="webhook-authentication">Webhook Authenticationの設定が正しくない</h3>
+<div class="highlight"><pre><span></span><code>I0214 07:03:56.822586       1 dynamic_cafile_content.go:129] Loaded a new CA Bundle and Verifier for &quot;client-ca-bundle::/var/lib/kubernetes/ca.pem&quot;
+F0214 07:03:56.822637       1 server.go:269] failed to run Kubelet: no client provided, cannot use webhook authentication
+goroutine 1 [running]:
+</code></pre></div>
+
+<ul>
+<li><a href="https://kubernetes.io/docs/reference/access-authn-authz/webhook/">https://kubernetes.io/docs/reference/access-authn-authz/webhook/</a></li>
+<li><a href="https://kubernetes.io/docs/reference/access-authn-authz/authentication/#webhook-token-authentication">https://kubernetes.io/docs/reference/access-authn-authz/authentication/#webhook-token-authentication</a></li>
+</ul>
+<h3 id="cni-plugin-etccninetd-cni-plugin">CNI Pluginを <code>/etc/cni/net.d</code> でCNI Pluginが見つからない</h3>
+<div class="highlight"><pre><span></span><code>kubelet.go:2163] Container runtime network not ready: NetworkReady=false reason:NetworkPluginNotReady message:docker: network plugin is not ready: cni config uninitialized
+cni.go:239] Unable to update cni config: no networks found in /etc/cni/net.d
+kubelet.go:2163] Container runtime network not ready: NetworkReady=false reason:NetworkPluginNotReady message:docker: network plugin is not ready: cni config uninitialized
+</code></pre></div>
+
+<ul>
+<li>CNI Pluginを <code>/etc/cni/net.d</code> へ置くことで解決する<ul>
+<li><a href="https://github.com/containernetworking/plugins/releases">https://github.com/containernetworking/plugins/releases</a></li>
+</ul>
+</li>
+</ul>
+<h3 id="kubelet-cannot-determine-cpu-online-state">Kubelet cannot determine CPU online state</h3>
+<div class="highlight"><pre><span></span><code>sysinfo.go:203] Nodes topology is not available, providing CPU topology
+sysfs.go:348] unable to read /sys/devices/system/cpu/cpu0/online: open /sys/devices/system/cpu/cpu0/online: no such file or directory
+sysfs.go:348] unable to read /sys/devices/system/cpu/cpu1/online: open /sys/devices/system/cpu/cpu1/online: no such file or directory
+sysfs.go:348] unable to read /sys/devices/system/cpu/cpu2/online: open /sys/devices/system/cpu/cpu2/online: no such file or directory
+sysfs.go:348] unable to read /sys/devices/system/cpu/cpu3/online: open /sys/devices/system/cpu/cpu3/online: no such file or directory
+gce.go:44] Error while reading product_name: open /sys/class/dmi/id/product_name: no such file or directory
+machine.go:253] Cannot determine CPU /sys/bus/cpu/devices/cpu0 online state, skipping
+machine.go:253] Cannot determine CPU /sys/bus/cpu/devices/cpu1 online state, skipping
+machine.go:253] Cannot determine CPU /sys/bus/cpu/devices/cpu2 online state, skipping
+machine.go:253] Cannot determine CPU /sys/bus/cpu/devices/cpu3 online state, skipping
+machine.go:72] Cannot read number of physical cores correctly, number of cores set to 0
+machine.go:253] Cannot determine CPU /sys/bus/cpu/devices/cpu0 online state, skipping
+machine.go:253] Cannot determine CPU /sys/bus/cpu/devices/cpu1 online state, skipping
+machine.go:253] Cannot determine CPU /sys/bus/cpu/devices/cpu2 online state, skipping
+machine.go:253] Cannot determine CPU /sys/bus/cpu/devices/cpu3 online state, skipping
+machine.go:86] Cannot read number of sockets correctly, number of sockets set to 0
+container_manager_linux.go:490] [ContainerManager]: Discovered runtime cgroups name:
+</code></pre></div>
+
+<ul>
+<li>既知らしい<ul>
+<li><a href="https://github.com/kubernetes/kubernetes/issues/95039">https://github.com/kubernetes/kubernetes/issues/95039</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="_3">参考</h2>
+<ul>
+<li><a href="https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config-file/">https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config-file/</a></li>
+<li><a href="https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/kubelet/config/v1beta1/types.go">https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/kubelet/config/v1beta1/types.go</a></li>
+<li><a href="https://cyberagent.ai/blog/tech/4036/">https://cyberagent.ai/blog/tech/4036/</a><ul>
+<li>kubelet の設定を変更して runtime に cri-o を指定する</li>
+</ul>
+</li>
+<li><a href="https://downloadkubernetes.com/">https://downloadkubernetes.com/</a></li>
+<li>
+<p><a href="https://kubernetes.io/docs/reference/config-api/kubelet-config.v1beta1/">https://kubernetes.io/docs/reference/config-api/kubelet-config.v1beta1/</a></p>
+</li>
+<li>
+<p>Node Authorization</p>
+<ul>
+<li><a href="https://qiita.com/tkusumi/items/f6a4f9150aa77d8f9822">https://qiita.com/tkusumi/items/f6a4f9150aa77d8f9822</a></li>
+<li><a href="https://kubernetes.io/docs/reference/access-authn-authz/node/">https://kubernetes.io/docs/reference/access-authn-authz/node/</a></li>
+<li><a href="https://kubernetes.io/ja/docs/reference/command-line-tools-reference/kubelet-authentication-authorization/">https://kubernetes.io/ja/docs/reference/command-line-tools-reference/kubelet-authentication-authorization/</a></li>
+</ul>
+</li>
+<li>
+<p>static pod</p>
+<ul>
+<li><a href="https://kubernetes.io/ja/docs/tasks/configure-pod-container/static-pod/">https://kubernetes.io/ja/docs/tasks/configure-pod-container/static-pod/</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/policy/pod-security-policy/">https://kubernetes.io/docs/concepts/policy/pod-security-policy/</a></li>
+<li><a href="https://hakengineer.xyz/2019/07/04/post-1997/#03_master1kube-schedulerkube-controller-managerkube-apiserver">https://hakengineer.xyz/2019/07/04/post-1997/#03_master1kube-schedulerkube-controller-managerkube-apiserver</a></li>
+<li><code>PodSecurityPolicy</code> を参照した元ネタ(<code>false</code> になっているのは <code>true</code> に直す)</li>
+<li><a href="https://github.com/kubernetes/kubernetes/issues/70952">https://github.com/kubernetes/kubernetes/issues/70952</a></li>
+</ul>
+</li>
+</ul>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        <a href="../master/06_health_check/" class="md-footer__link md-footer__link--prev" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              07. health check
+            </div>
+          </div>
+        </a>
+      
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../../assets/javascripts/workers/search.fe42c31b.min.js", "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.4ea5477f.min.js"></script>
+      
+    
+  </body>
+</html>

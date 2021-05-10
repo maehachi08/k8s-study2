@@ -1,0 +1,867 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Project documentation with Markdown.">
+      
+      
+      
+        <meta name="author" content="maehachi08">
+      
+      
+        <link rel="canonical" href="https://maehachi08.github.io/k8s-study/setup/05_creating_config/">
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.3">
+    
+    
+      
+        <title>05. 認証のためのkubeconfigの作成 - maehachi08/k8s-study</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.e35208c4.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ef6f36e2.min.css">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+      
+    
+    
+    
+    
+      
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    <script>function __prefix(e){return new URL("../..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#kubeconfig" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="maehachi08/k8s-study" class="md-header__button md-logo" aria-label="maehachi08/k8s-study" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            maehachi08/k8s-study
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              05. 認証のためのkubeconfigの作成
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://github.com/maehachi08/k8s-study" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="maehachi08/k8s-study" class="md-nav__button md-logo" aria-label="maehachi08/k8s-study" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    maehachi08/k8s-study
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/maehachi08/k8s-study" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
+      
+      <label class="md-nav__link" for="__nav_2">
+        Setup
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Setup" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Setup
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01_setup_RaspberryPi/" class="md-nav__link">
+        01. Raspberry Pi 構成
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02_setup_ubuntu20-04-LTS/" class="md-nav__link">
+        02. OS Install
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03_common_settings/" class="md-nav__link">
+        03. master/nodeで共通手順
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04_creation_certificate/" class="md-nav__link">
+        04. 認証局の設定とTLS証明書の作成
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          05. 認証のためのkubeconfigの作成
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        05. 認証のためのkubeconfigの作成
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    手順
+  </a>
+  
+    <nav class="md-nav" aria-label="手順">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#kubelet" class="md-nav__link">
+    kubelet
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kube-proxy" class="md-nav__link">
+    kube-proxy
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kube-controller-manager" class="md-nav__link">
+    kube-controller-manager
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kube-scheduler" class="md-nav__link">
+    kube-scheduler
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#admin" class="md-nav__link">
+    admin
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    参考資料
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+          
+            
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_6" type="checkbox" id="__nav_2_6" >
+      
+      <label class="md-nav__link" for="__nav_2_6">
+        06. master node
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="06. master node" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_6">
+          <span class="md-nav__icon md-icon"></span>
+          06. master node
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../bootstrapping_kubelet/" class="md-nav__link">
+        01. bootstrapping kubelet
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../master/01_bootstrapping_etcd/" class="md-nav__link">
+        02. bootstrapping etcd
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../master/02_bootstrapping_kube-apiserver/" class="md-nav__link">
+        03. bootstrapping kube-apiserver
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../master/03_bootstrapping_kube-controller-manager/" class="md-nav__link">
+        04. bootstrapping kube-controller-manager
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../master/04_bootstrapping_kube-scheduler/" class="md-nav__link">
+        05. bootstrapping kube-scheduler
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../master/05_configuration_rbac_to_access_from-apiserver-to-kubelet/" class="md-nav__link">
+        06. kube-apiserver から kubelet へのアクセス権を設定する
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../master/06_health_check/" class="md-nav__link">
+        07. health check
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" >
+      
+      <label class="md-nav__link" for="__nav_2_7">
+        07. worker node
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="07. worker node" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_7">
+          <span class="md-nav__icon md-icon"></span>
+          07. worker node
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../bootstrapping_kubelet/" class="md-nav__link">
+        01. bootstrapping kubelet
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tips/index.md" class="md-nav__link">
+        Tips
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    手順
+  </a>
+  
+    <nav class="md-nav" aria-label="手順">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#kubelet" class="md-nav__link">
+    kubelet
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kube-proxy" class="md-nav__link">
+    kube-proxy
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kube-controller-manager" class="md-nav__link">
+    kube-controller-manager
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kube-scheduler" class="md-nav__link">
+    kube-scheduler
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#admin" class="md-nav__link">
+    admin
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    参考資料
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                
+                <h1 id="kubeconfig">認証のためのkubeconfigの作成</h1>
+<ul>
+<li>Controll PlaneとNodeの各コンポーネントの <code>.kubeconfig</code> を作成する</li>
+</ul>
+<h2 id="_1">手順</h2>
+<h3 id="kubelet">kubelet</h3>
+<div class="highlight"><pre><span></span><code>KUBERNETES_PUBLIC_ADDRESS=192.168.10.50
+
+for instance in k8s-master k8s-node1 k8s-node2; do
+    kubectl config set-cluster kubernetes \
+        --certificate-authority=ca.pem \
+        --embed-certs=true \
+        --server=https://${KUBERNETES_PUBLIC_ADDRESS}:6443 \
+        --kubeconfig=${instance}.kubeconfig
+
+    kubectl config set-credentials system:node:${instance} \
+        --client-certificate=${instance}.pem \
+        --client-key=${instance}-key.pem \
+        --embed-certs=true \
+        --kubeconfig=${instance}.kubeconfig
+
+    kubectl config set-context default \
+        --cluster=kubernetes \
+        --user=system:node:${instance} \
+        --kubeconfig=${instance}.kubeconfig
+
+    kubectl config use-context default --kubeconfig=${instance}.kubeconfig
+done
+</code></pre></div>
+
+<h3 id="kube-proxy">kube-proxy</h3>
+<div class="highlight"><pre><span></span><code>KUBERNETES_PUBLIC_ADDRESS=192.168.10.50
+
+kubectl config set-cluster kubernetes \
+    --certificate-authority=ca.pem \
+    --embed-certs=true \
+    --server=https://${KUBERNETES_PUBLIC_ADDRESS}:6443 \
+    --kubeconfig=kube-proxy.kubeconfig
+
+kubectl config set-credentials system:kube-proxy \
+    --client-certificate=kube-proxy.pem \
+    --client-key=kube-proxy-key.pem \
+    --embed-certs=true \
+    --kubeconfig=kube-proxy.kubeconfig
+
+kubectl config set-context default \
+    --cluster=kubernetes \
+    --user=system:kube-proxy \
+    --kubeconfig=kube-proxy.kubeconfig
+
+kubectl config use-context default --kubeconfig=kube-proxy.kubeconfig
+</code></pre></div>
+
+<h3 id="kube-controller-manager">kube-controller-manager</h3>
+<div class="highlight"><pre><span></span><code>KUBE_API_SERVER_ADDRESS=192.168.10.50
+
+kubectl config set-cluster kubernetes \
+    --certificate-authority=ca.pem \
+    --embed-certs=true \
+    --server=https://${KUBE_API_SERVER_ADDRESS}:6443 \
+    --kubeconfig=kube-controller-manager.kubeconfig
+
+kubectl config set-credentials system:kube-controller-manager \
+    --client-certificate=kube-controller-manager.pem \
+    --client-key=kube-controller-manager-key.pem \
+    --embed-certs=true \
+    --kubeconfig=kube-controller-manager.kubeconfig
+
+kubectl config set-context default \
+    --cluster=kubernetes \
+    --user=system:kube-controller-manager \
+    --kubeconfig=kube-controller-manager.kubeconfig
+
+kubectl config use-context default --kubeconfig=kube-controller-manager.kubeconfig
+</code></pre></div>
+
+<h3 id="kube-scheduler">kube-scheduler</h3>
+<div class="highlight"><pre><span></span><code>KUBE_API_SERVER_ADDRESS=192.168.10.50
+
+kubectl config set-cluster kubernetes \
+    --certificate-authority=ca.pem \
+    --embed-certs=true \
+    --server=https://${KUBE_API_SERVER_ADDRESS}:6443 \
+    --kubeconfig=kube-scheduler.kubeconfig
+
+kubectl config set-credentials system:kube-scheduler \
+    --client-certificate=kube-scheduler.pem \
+    --client-key=kube-scheduler-key.pem \
+    --embed-certs=true \
+    --kubeconfig=kube-scheduler.kubeconfig
+
+kubectl config set-context default \
+    --cluster=kubernetes \
+    --user=system:kube-scheduler \
+    --kubeconfig=kube-scheduler.kubeconfig
+
+kubectl config use-context default --kubeconfig=kube-scheduler.kubeconfig
+</code></pre></div>
+
+<h3 id="admin">admin</h3>
+<div class="highlight"><pre><span></span><code>KUBERNETES_PUBLIC_ADDRESS=192.168.10.50
+
+kubectl config set-cluster kubernetes \
+    --certificate-authority=ca.pem \
+    --embed-certs=true \
+    --server=https://${KUBERNETES_PUBLIC_ADDRESS}:6443 \
+    --kubeconfig=admin.kubeconfig
+
+kubectl config set-credentials admin \
+    --client-certificate=admin.pem \
+    --client-key=admin-key.pem \
+    --embed-certs=true \
+    --kubeconfig=admin.kubeconfig
+
+kubectl config set-context default \
+    --cluster=kubernetes \
+    --user=admin \
+    --kubeconfig=admin.kubeconfig
+
+kubectl config use-context default --kubeconfig=admin.kubeconfig
+</code></pre></div>
+
+<h2 id="_2">参考資料</h2>
+<ul>
+<li><a href="https://github.com/kelseyhightower/kubernetes/blob/master/docs/05-kubernetes-configuration-files.md">https://github.com/kelseyhightower/kubernetes/blob/master/docs/05-kubernetes-configuration-files.md</a></li>
+<li><a href="https://docs.oracle.com/cd/F34086_01/kubernetes-on-oci_jp.pdf">https://docs.oracle.com/cd/F34086_01/kubernetes-on-oci_jp.pdf</a></li>
+<li><a href="https://h3poteto.hatenablog.com/entry/2020/08/20/180552">https://h3poteto.hatenablog.com/entry/2020/08/20/180552</a></li>
+<li><code>kubectl config set-cluster</code><ul>
+<li><a href="https://jamesdefabia.github.io/docs/user-guide/kubectl/kubectl_config_set-cluster/">https://jamesdefabia.github.io/docs/user-guide/kubectl/kubectl_config_set-cluster/</a></li>
+<li><a href="https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-em-set-cluster-em-">https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-em-set-cluster-em-</a></li>
+</ul>
+</li>
+<li><code>kubectl config set-credentials</code><ul>
+<li><a href="https://jamesdefabia.github.io/docs/user-guide/kubectl/kubectl_config_set-credentials/">https://jamesdefabia.github.io/docs/user-guide/kubectl/kubectl_config_set-credentials/</a></li>
+<li><a href="https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-em-set-credentials-em-">https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-em-set-credentials-em-</a></li>
+</ul>
+</li>
+<li><code>kubectl config set-context</code><ul>
+<li><a href="https://jamesdefabia.github.io/docs/user-guide/kubectl/kubectl_config_set-context/">https://jamesdefabia.github.io/docs/user-guide/kubectl/kubectl_config_set-context/</a></li>
+<li><a href="https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-em-set-context-em-">https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-em-set-context-em-</a></li>
+</ul>
+</li>
+</ul>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        <a href="../04_creation_certificate/" class="md-footer__link md-footer__link--prev" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              04. 認証局の設定とTLS証明書の作成
+            </div>
+          </div>
+        </a>
+      
+      
+        <a href="../bootstrapping_kubelet/" class="md-footer__link md-footer__link--next" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              01. bootstrapping kubelet
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../../assets/javascripts/workers/search.fe42c31b.min.js", "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.4ea5477f.min.js"></script>
+      
+    
+  </body>
+</html>
